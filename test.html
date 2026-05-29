@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<title>R Studio</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #eef2f7;
+}
+
+#container {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+button {
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.option {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  background: #eee;
+}
+
+.correct { background:#28a745; color:white; }
+.wrong { background:#dc3545; color:white; }
+</style>
+</head>
+
+<body>
+
+<div id="container">
+
+<h1>R Studio Izpit</h1>
+
+<div id="menu">
+<p>Izberi teme:</p>
+
+<label><input type="checkbox" value="osnove"> Osnove R</label><br>
+<label><input type="checkbox" value="statistika"> Statistika</label><br>
+<label><input type="checkbox" value="grafi"> Grafi</label><br>
+<label><input type="checkbox" value="korelacija"> Korelacija</label><br>
+
+<br>
+<button onclick="startExam()">Začni</button>
+</div>
+
+<div id="quiz" style="display:none;">
+<h2 id="question"></h2>
+<div id="options"></div>
+<button id="nextBtn" onclick="nextQuestion()" style="display:none;">Naprej</button>
+</div>
+
+<div id="result" style="display:none;"></div>
+
+</div>
+
+<script>
+
+/* ================= QUESTION BANK ================= */
+
+const questionBank = {
+
+  osnove: [
+
+    {q:"Kaj naredi c()?",a:"Ustvari vektor",o:["Ustvari vektor","Shrani datoteko","Riše graf"]},
+    {q:"Kaj naredi library()?",a:"Naloži paket",o:["Naloži paket","Izbriše podatke","Riše graf"]},
+    {q:"Kaj pomeni <- ?",a:"Prirejanje vrednosti",o:["Prirejanje vrednosti","Seštevanje","Primerjanje"]},
+    {q:"Kaj vrne length(c(1,2,3))?",a:"3",o:["3","2","6"]},
+    {q:"Kaj ustvari c('a','b')?",a:"Vektor znakov",o:["Vektor znakov","Tabela","Graf"]},
+    {q:"Kaj naredi setwd()?",a:"Nastavi direktorij",o:["Nastavi direktorij","Mean","Graf"]},
+    {q:"Kaj vrne getwd()?",a:"Trenutni direktorij",o:["Trenutni direktorij","Shrani datoteko","Naloži paket"]},
+    {q:"Kaj naredi rm(x)?",a:"Izbriše objekt",o:["Izbriše objekt","Shrani objekt","Mean"]},
+    {q:"Kaj pomeni komentar (#)?",a:"Ignorira kodo",o:["Ignorira kodo","Zažene kodo","Zbriše"]},
+    {q:"Kaj naredi View(x)?",a:"Prikaže podatke",o:["Prikaže podatke","Izbriše","Naloži"]},
+
+    {q:"Kaj ustvari c(1:5)?",a:"Vektor",o:["Vektor","Matrika","Graf"]},
+    {q:"Kaj pomeni numeric?",a:"Številski tip",o:["Številski tip","Graf","Faktor"]},
+    {q:"Kaj pomeni character?",a:"Besedilo",o:["Besedilo","Števila","Graf"]},
+    {q:"Kaj pomeni TRUE?",a:"Logična vrednost",o:["Logična vrednost","Število","Graf"]},
+    {q:"Kaj naredi ls()?",a:"Seznam objektov",o:["Seznam objektov","Izbriše","Naloži"]},
+    {q:"Kaj pomeni FALSE?",a:"Logična vrednost",o:["Logična vrednost","Število","Graf"]},
+    {q:"Kaj naredi install.packages()?",a:"Namesti paket",o:["Namesti paket","Izbriše","Riše"]},
+    {q:"Kaj naredi data.frame()?",a:"Ustvari tabelo",o:["Ustvari tabelo","Graf","Sešteje"]},
+    {q:"Kaj pomeni vector?",a:"Več vrednosti",o:["Več vrednosti","Graf","Ena vrednost"]},
+    {q:"Kaj naredi length()?",a:"Število elementov",o:["Število elementov","Vsota","Graf"]}
+
+  ],
+
+  statistika: [
+
+    {q:"Kaj je mean()?",a:"Povprečje",o:["Povprečje","Mediana","Vsota"]},
+    {q:"Kaj meri sd()?",a:"Razpršenost",o:["Razpršenost","Povprečje","Minimum"]},
+    {q:"Kaj je mediana?",a:"Srednja vrednost",o:["Srednja vrednost","Vsota","Max"]},
+    {q:"Kaj je varianca?",a:"Razpršenost",o:["Razpršenost","Povprečje","Max"]},
+
+    {q:"mean(c(2,4,6))=?",a:"4",o:["4","3","6"]},
+    {q:"median(c(1,5,10))=?",a:"5",o:["5","1","10"]},
+    {q:"sd meri?",a:"Variabilnost",o:["Variabilnost","Povprečje","Max"]},
+    {q:"Kaj je minimum?",a:"Najmanjša vrednost",o:["Najmanjša vrednost","Največja","Povprečje"]},
+    {q:"Kaj je maximum?",a:"Največja vrednost",o:["Največja vrednost","Najmanjša","Povprečje"]},
+
+    {q:"Kaj pomeni data spread?",a:"Razpršenost",o:["Razpršenost","Mean","Graf"]},
+    {q:"Kaj meri range?",a:"Razpon",o:["Razpon","Mean","Graf"]},
+    {q:"Statistika preučuje?",a:"Podatke",o:["Podatke","Graf","Kodo"]},
+    {q:"Kaj meri variance?",a:"Razpršenost",o:["Razpršenost","Povprečje","Max"]},
+    {q:"Kaj naredi sum()?",a:"Vsota",o:["Vsota","Mean","Graf"]},
+    {q:"Kaj je quartile?",a:"Razdeli podatke",o:["Razdeli","Sešteje","Riše"]},
+    {q:"Kaj pomeni central tendency?",a:"Srednje vrednosti",o:["Srednje","Min","Max"]},
+    {q:"Statistični podatki so?",a:"Opazovanja",o:["Opazovanja","Grafi","Koda"]},
+    {q:"Kaj pomeni opisna statistika?",a:"Opis podatkov",o:["Opis","Napoved","Graf"]},
+    {q:"Kaj meri sd?",a:"Standardni odklon",o:["Standardni odklon","Mean","Graf"]},
+    {q:"Kaj naredi summary()?",a:"Povzetek",o:["Povzetek","Izbriše","Riše"]}
+
+  ],
+
+  grafi: [
+
+    {q:"Histogram je za?",a:"Številčne podatke",o:["Številčne podatke","Kategorije","Besede"]},
+    {q:"Barplot prikazuje?",a:"Kategorije",o:["Kategorije","Normalnost","Gostoto"]},
+    {q:"Pie chart prikazuje?",a:"Deleže",o:["Deleže","Mean","SD"]},
+    {q:"Histogram prikazuje?",a:"Porazdelitev",o:["Porazdelitev","Graf","Tabela"]},
+
+    {q:"Kaj na x-osi histograma?",a:"Vrednosti",o:["Vrednosti","Imena","Grafi"]},
+    {q:"Kaj na y-osi histograma?",a:"Frekvence",o:["Frekvence","Imena","Koda"]},
+    {q:"Barplot stolpci?",a:"Ločeni",o:["Ločeni","Skupaj","Ni"]},
+    {q:"Histogram stolpci?",a:"Skupaj",o:["Skupaj","Ločeni","Ni"]},
+    {q:"Pie chart?",a:"Krog",o:["Krog","Kvadrat","Linija"]},
+
+    {q:"plot() naredi?",a:"Graf",o:["Graf","Tabela","Delete"]},
+    {q:"barplot() naredi?",a:"Stolpčni graf",o:["Stolpčni graf","Pie","Histogram"]},
+    {q:"hist() naredi?",a:"Histogram",o:["Histogram","Barplot","Tabelo"]},
+    {q:"Graf je za?",a:"Vizualizacijo",o:["Vizualizacijo","Brisanje","Shranjevanje"]},
+    {q:"Kaj pomeni x-axis?",a:"Vodoravna os",o:["Vodoravna","Navpična","Ni"]},
+    {q:"Kaj pomeni y-axis?",a:"Navpična os",o:["Navpična","Vodoravna","Ni"]},
+    {q:"Vizualizacija pomaga?",a:"Razumevanje",o:["Razumevanje","Brisanje","Napake"]},
+    {q:"Barplot uporablja?",a:"Frekvence",o:["Frekvence","Matrice","Graf"]},
+    {q:"Histogram uporablja?",a:"Bins",o:["Bins","Rows","Cols"]},
+    {q:"Grafi pomagajo?",a:"Analiza",o:["Analiza","Napaka","Delete"]},
+    {q:"Plot prikaže?",a:"Podatke",o:["Podatke","Napako","Delete"]}
+
+  ],
+
+  korelacija: [
+
+    {q:"Kaj meri Pearson r?",a:"Povezanost",o:["Povezanost","Mean","SD"]},
+    {q:"r = 1 pomeni?",a:"Popolna pozitivna",o:["Popolna pozitivna","Ni","Negativna"]},
+    {q:"r = 0 pomeni?",a:"Ni povezave",o:["Ni povezave","Pozitivna","Negativna"]},
+    {q:"r = -1 pomeni?",a:"Popolna negativna",o:["Popolna negativna","Pozitivna","Ni"]},
+
+    {q:"Korelacija pomeni?",a:"Odnos med spremenljivkami",o:["Odnos","Mean","Graf"]},
+    {q:"Pozitivna korelacija?",a:"Raste skupaj",o:["Raste skupaj","Pada","Ni"]},
+    {q:"Negativna korelacija?",a:"Obratno gibanje",o:["Obratno","Isto","Ni"]},
+    {q:"Korelacija ne pomeni?",a:"Vzročnosti",o:["Vzročnosti","Povezave","Graf"]},
+
+    {q:"cor() naredi?",a:"Izračuna korelacijo",o:["Izračuna","Riše","Briše"]},
+    {q:"Scatter plot?",a:"Točke",o:["Točke","Linije","Krog"]},
+    {q:"Korelacija je?",a:"Statistični ukrep",o:["Ukrep","Graf","Napaka"]},
+    {q:"Močna korelacija?",a:"Visok r",o:["Visok r","Nizek","0"]},
+    {q:"Šibka korelacija?",a:"Nizek r",o:["Nizek r","Visok","0"]},
+    {q:"Linearno pomeni?",a:"Ravna linija",o:["Ravna","Krivulja","Ni"]},
+    {q:"Korelacija uporablja?",a:"Podatke",o:["Podatke","Graf","Naziv"]},
+    {q:"Scatter je?",a:"Graf",o:["Graf","Tabela","Koda"]},
+    {q:"r meri?",a:"Smer in moč",o:["Smer in moč","Mean","SD"]},
+    {q:"Kaj pomeni +?",a:"Pozitivno",o:["Pozitivno","Negativno","Ni"]},
+    {q:"Kaj pomeni -?",a:"Negativno",o:["Negativno","Pozitivno","Ni"]},
+    {q:"Korelacija je med?",a:"2 spremenljivkama",o:["2 spremenljivkama","1","3"]}
+
+  ]
+
+};
+
+/* ================= ENGINE ================= */
+
+let selectedTopics = [];
+let questions = [];
+let current = 0;
+let score = 0;
+
+function startExam() {
+
+  selectedTopics = Array.from(document.querySelectorAll("input:checked"))
+    .map(x => x.value);
+
+  if (selectedTopics.length === 0) {
+    alert("Izberi temo!");
+    return;
+  }
+
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("quiz").style.display = "block";
+
+  questions = buildExam(12);
+  current = 0;
+  score = 0;
+
+  showQuestion();
+}
+
+/* ✅ build exam without repeats */
+
+function buildExam(n) {
+
+  let pool = [];
+
+  selectedTopics.forEach(t => {
+    pool = pool.concat(questionBank[t]);
+  });
+
+  shuffle(pool);
+
+  return pool.slice(0, n);
+}
+
+function showQuestion() {
+
+  let q = questions[current];
+
+  document.getElementById("question").innerText =
+    (current+1) + ". " + q.q;
+
+  let div = document.getElementById("options");
+  div.innerHTML = "";
+
+  shuffle(q.o).forEach(opt => {
+    let btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(btn, opt);
+    div.appendChild(btn);
+  });
+}
+
+function checkAnswer(btn, selected) {
+
+  if (selected === questions[current].a) {
+    btn.classList.add("correct");
+    score++;
+  } else {
+    btn.classList.add("wrong");
+  }
+
+  document.getElementById("nextBtn").style.display = "block";
+}
+
+function nextQuestion() {
+
+  current++;
+
+  if (current >= questions.length) {
+    finish();
+    return;
+  }
+
+  document.getElementById("nextBtn").style.display = "none";
+  showQuestion();
+}
+
+function finish() {
+
+  document.getElementById("quiz").style.display = "none";
+
+  let res = document.getElementById("result");
+
+  res.style.display = "block";
+
+  res.innerHTML = `
+    ✅ Rezultat: ${score}/${questions.length}
+    <br><br>
+    <button onclick="location.reload()">Ponovi</button>
+  `;
+}
+
+/* ================= HELPERS ================= */
+
+function shuffle(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+</script>
+
+</body>
+</html>

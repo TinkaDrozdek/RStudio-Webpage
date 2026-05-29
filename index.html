@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learn RStudio</title>
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- p5.js (optional if you still need it) -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+
+  <!-- ✅ redirect function -->
+  <script>
+    function goToAgent() {
+      window.location.href = "https://m365.cloud.microsoft/chat/?titleId=T_35842a7d-e7d8-25c3-87a4-290cf3d0593b&source=embedded-builder";
+    }
+  </script>
+</head>
+
+<body>
+
+  <h1 id="header">Learn RStudio!!!</h1>
+
+  <!-- Intro screen -->
+  <div id="overlay">
+    <div id="title">
+      DO YOU WANT TO LEARN RStudio???
+    </div>
+    <div id="subtitle">
+      press anywhere to begin
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div id="mainPage">
+    
+    <div class="buttonRow">
+
+      <button class="normalButton" id="aboutBtn">
+        About us
+      </button>
+
+      <div class="bubble" id="aboutBubble">
+        HELLO
+      </div>
+
+    </div>
+
+    <div class="buttonRow">
+
+      <!-- ✅ main button now opens YOUR AGENT -->
+      <button class="greenButton" onclick="goToAgent()">
+        BEGIN LEARNING
+      </button>
+
+    </div>
+
+    <div class="buttonRow">
+
+    <button class="normalButton" onclick="goToTest()">
+      Test your knowledge!
+    </button>
+
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+    <script>
+  function goToTest() {
+    window.location.href = "test.html";
+  }
+  </script>
+
+</body>
+</html>

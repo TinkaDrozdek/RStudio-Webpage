@@ -1,0 +1,217 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background: black;
+  font-family: Arial, sans-serif;
+}
+
+canvas {
+  display: block;
+}
+
+/* =========================
+   INTRO SCREEN
+========================= */
+
+#overlay {
+  position: absolute;
+
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  color: white;
+
+  z-index: 10;
+
+  transition: opacity 1s ease;
+}
+
+#title {
+  font-size: 4rem;
+  font-weight: bold;
+
+  text-align: center;
+
+  animation: pulse 1.5s infinite;
+}
+
+#subtitle {
+  margin-top: 20px;
+
+  font-size: 1.5rem;
+
+  animation: blink 1.2s infinite;
+}
+
+/* =========================
+   MAIN PAGE
+========================= */
+
+#mainPage {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -80%);
+
+  display: none;
+  flex-direction: column;
+
+  gap: 40px;
+
+  z-index: 20;
+}
+
+#header {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+
+  transform: translateX(-50%) translateY(-20px);
+
+  font-size: 2.8rem;
+  font-weight: bold;
+
+  color: black;
+
+  opacity: 0;
+
+  z-index: 50;
+
+  transition: opacity 1s ease, transform 1s ease;
+
+  letter-spacing: 1px;
+}
+
+/* when visible */
+#header.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.buttonRow {
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+}
+
+button {
+  width: 320px;
+  
+  padding: 18px 40px;
+
+  font-size: 1.3rem;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+/* White buttons */
+
+.normalButton {
+  background: white;
+  color: black;
+
+  border: 2px solid black;
+}
+
+.normalButton:hover {
+  transform: scale(1.05);
+}
+
+/* Green learning button */
+
+.greenButton {
+  background: #3ddb63;
+  color: white;
+
+  border: none;
+
+  font-weight: bold;
+
+  animation: pulseGreen 1.5s infinite;
+}
+
+.greenButton:hover {
+  transform: scale(1.08);
+}
+
+/* Bubble */
+
+.bubble {
+  background: white;
+
+  border-radius: 20px;
+
+  padding: 12px 20px;
+
+  font-size: 1rem;
+
+  color: black;
+
+  display: none;
+
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+/* =========================
+   ANIMATIONS
+========================= */
+
+@keyframes pulse {
+
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes blink {
+
+  0%, 100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGreen {
+
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px #3ddb63;
+  }
+
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 25px #3ddb63;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px #3ddb63;
+  }
+}
