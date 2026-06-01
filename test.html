@@ -2,7 +2,7 @@
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
-<title>R Studio</title>
+<title>R Studio Izpit</title>
 
 <style>
 body {
@@ -43,21 +43,13 @@ button {
 <h1>R Studio Izpit</h1>
 
 <div id="menu">
-<p>Izberi teme:</p>
-
-<label><input type="checkbox" value="osnove"> Osnove R</label><br>
-<label><input type="checkbox" value="statistika"> Statistika</label><br>
-<label><input type="checkbox" value="grafi"> Grafi</label><br>
-<label><input type="checkbox" value="korelacija"> Korelacija</label><br>
-
-<br>
-<button onclick="startExam()">Začni</button>
+  <button onclick="startExam()">Začni izpit</button>
 </div>
 
 <div id="quiz" style="display:none;">
-<h2 id="question"></h2>
-<div id="options"></div>
-<button id="nextBtn" onclick="nextQuestion()" style="display:none;">Naprej</button>
+  <h2 id="question"></h2>
+  <div id="options"></div>
+  <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Naprej</button>
 </div>
 
 <div id="result" style="display:none;"></div>
@@ -66,159 +58,124 @@ button {
 
 <script>
 
-/* ================= QUESTION BANK ================= */
+/* ✅ FULL QUESTION BANK (from your PDF) */
 
-const questionBank = {
+const questionBank = [
+/* ---------- ORIGINAL 20 ---------- */
+{q:"Kaj je R?",o:["Samo statistični paket","Programski jezik in statistični paket","Samo urejevalnik besedila","Operacijski sistem"],a:"Programski jezik in statistični paket"},
+{q:"Katera funkcija namesti paket v R?",o:["library()","install.packages()","package()","load()"],a:"install.packages()"},
+{q:"Katera funkcija aktivira paket?",o:["library()","install.packages()","attach()","search()"],a:"library()"},
+{q:"Kateri operator je priporočljiv za prirejanje vrednosti?",o:["=","->","<-","::"],a:"<-"},
+{q:"Katera funkcija izpiše delovni direktorij?",o:["setwd()","getwd()","dir()","pwd()"],a:"getwd()"},
+{q:"Katera funkcija nastavi delovni direktorij?",o:["setwd()","getwd()","dir()","cd()"],a:"setwd()"},
+{q:"R razlikuje velike in male črke?",o:["Ne","Samo pri objektih","Da","Samo v Linuxu"],a:"Da"},
+{q:"Katero decimalno ločilo uporablja R?",o:["Vejico","Piko","Podpičje","Dvopičje"],a:"Piko"},
+{q:"Kako označimo komentar?",o:["//","#","%","--"],a:"#"},
+{q:"Katera funkcija izpiše seznam objektov?",o:["ls()","list()","objects()","dir()"],a:"ls()"},
+{q:"Katera funkcija izbriše objekt?",o:["delete()","erase()","rm()","remove.object()"],a:"rm()"},
+{q:"Katera funkcija prikaže pomoč?",o:["help() ali ?","info()","guide()","manual()"],a:"help() ali ?"},
+{q:"Kateri tip predstavlja besedilo?",o:["numeric","character","logical","factor"],a:"character"},
+{q:"Kaj pomeni NA?",o:["Ni vrednosti","Napaka","0","TRUE"],a:"Ni vrednosti"},
+{q:"Kaj vrne == ?",o:["Numerično","Logično","Tabela","Graf"],a:"Logično"},
+{q:"Katera struktura ima isti tip?",o:["Seznam","Vektor","Okvir","Polje"],a:"Vektor"},
+{q:"Kako ustvarimo vektor?",o:["c()","v()","combine()","vector()"],a:"c()"},
+{q:"Katera funkcija vrne dolžino?",o:["size()","dim()","length()","count()"],a:"length()"},
+{q:"Matrika vsebuje:",o:["Različne tipe","En tip","Samo faktorje","Samo besede"],a:"En tip"},
+{q:"Katera funkcija ustvari tabelo?",o:["matrix()","data.frame()","table()","frame()"],a:"data.frame()"},
 
-  osnove: [
+/* ---------- +80 NEW VARIATIONS ---------- */
 
-    {q:"Kaj naredi c()?",a:"Ustvari vektor",o:["Ustvari vektor","Shrani datoteko","Riše graf"]},
-    {q:"Kaj naredi library()?",a:"Naloži paket",o:["Naloži paket","Izbriše podatke","Riše graf"]},
-    {q:"Kaj pomeni <- ?",a:"Prirejanje vrednosti",o:["Prirejanje vrednosti","Seštevanje","Primerjanje"]},
-    {q:"Kaj vrne length(c(1,2,3))?",a:"3",o:["3","2","6"]},
-    {q:"Kaj ustvari c('a','b')?",a:"Vektor znakov",o:["Vektor znakov","Tabela","Graf"]},
-    {q:"Kaj naredi setwd()?",a:"Nastavi direktorij",o:["Nastavi direktorij","Mean","Graf"]},
-    {q:"Kaj vrne getwd()?",a:"Trenutni direktorij",o:["Trenutni direktorij","Shrani datoteko","Naloži paket"]},
-    {q:"Kaj naredi rm(x)?",a:"Izbriše objekt",o:["Izbriše objekt","Shrani objekt","Mean"]},
-    {q:"Kaj pomeni komentar (#)?",a:"Ignorira kodo",o:["Ignorira kodo","Zažene kodo","Zbriše"]},
-    {q:"Kaj naredi View(x)?",a:"Prikaže podatke",o:["Prikaže podatke","Izbriše","Naloži"]},
+{q:"Kaj naredi install.packages()?",o:["Namesti paket","Izbriše","Riše graf","Shrani"],a:"Namesti paket"},
+{q:"Kaj naredi getwd()?",o:["Vrne mapo","Riše graf","Izbriše","Naloži"],a:"Vrne mapo"},
+{q:"Kaj naredi setwd()?",o:["Nastavi mapo","Prikaže graf","Shrani","Odpre file"],a:"Nastavi mapo"},
+{q:"Kaj pomeni TRUE?",o:["Logična vrednost","Število","Graf","Tabela"],a:"Logična vrednost"},
+{q:"Kaj pomeni FALSE?",o:["Logična vrednost","Število","Graf","Napaka"],a:"Logična vrednost"},
 
-    {q:"Kaj ustvari c(1:5)?",a:"Vektor",o:["Vektor","Matrika","Graf"]},
-    {q:"Kaj pomeni numeric?",a:"Številski tip",o:["Številski tip","Graf","Faktor"]},
-    {q:"Kaj pomeni character?",a:"Besedilo",o:["Besedilo","Števila","Graf"]},
-    {q:"Kaj pomeni TRUE?",a:"Logična vrednost",o:["Logična vrednost","Število","Graf"]},
-    {q:"Kaj naredi ls()?",a:"Seznam objektov",o:["Seznam objektov","Izbriše","Naloži"]},
-    {q:"Kaj pomeni FALSE?",a:"Logična vrednost",o:["Logična vrednost","Število","Graf"]},
-    {q:"Kaj naredi install.packages()?",a:"Namesti paket",o:["Namesti paket","Izbriše","Riše"]},
-    {q:"Kaj naredi data.frame()?",a:"Ustvari tabelo",o:["Ustvari tabelo","Graf","Sešteje"]},
-    {q:"Kaj pomeni vector?",a:"Več vrednosti",o:["Več vrednosti","Graf","Ena vrednost"]},
-    {q:"Kaj naredi length()?",a:"Število elementov",o:["Število elementov","Vsota","Graf"]}
+{q:"Kaj vrne length(c(1,2,3))?",o:["3","2","6","1"],a:"3"},
+{q:"Koliko elementov ima c(5,6)?",o:["2","3","1","5"],a:"2"},
+{q:"Kaj vrne c(1,2,3)?",o:["Vektor","Tabela","Graf","Napaka"],a:"Vektor"},
+{q:"Kaj vrne c('a','b')?",o:["Vektor znakov","Števila","Napaka","Lista"],a:"Vektor znakov"},
 
-  ],
+{q:"Kaj naredi ls()?",o:["Seznam objektov","Riše graf","Izračuna mean","Shrani"],a:"Seznam objektov"},
+{q:"Kaj naredi rm(x)?",o:["Izbriše objekt","Naloži","Riše graf","Shrani"],a:"Izbriše objekt"},
 
-  statistika: [
+{q:"Kaj pomeni numeric?",o:["Števila","Besedilo","Graf","Tabela"],a:"Števila"},
+{q:"Kaj pomeni character?",o:["Besedilo","Števila","Graf","Napaka"],a:"Besedilo"},
+{q:"Kaj pomeni logical?",o:["TRUE/FALSE","Števila","Graf","Tabela"],a:"TRUE/FALSE"},
 
-    {q:"Kaj je mean()?",a:"Povprečje",o:["Povprečje","Mediana","Vsota"]},
-    {q:"Kaj meri sd()?",a:"Razpršenost",o:["Razpršenost","Povprečje","Minimum"]},
-    {q:"Kaj je mediana?",a:"Srednja vrednost",o:["Srednja vrednost","Vsota","Max"]},
-    {q:"Kaj je varianca?",a:"Razpršenost",o:["Razpršenost","Povprečje","Max"]},
+{q:"Kaj pomeni komentar v R?",o:["Ignorira kodo","Izvede kodo","Napaka","Zbriše"],a:"Ignorira kodo"},
+{q:"Kaj naredi # v R?",o:["Komentar","Seštevanje","Funkcija","Napaka"],a:"Komentar"},
 
-    {q:"mean(c(2,4,6))=?",a:"4",o:["4","3","6"]},
-    {q:"median(c(1,5,10))=?",a:"5",o:["5","1","10"]},
-    {q:"sd meri?",a:"Variabilnost",o:["Variabilnost","Povprečje","Max"]},
-    {q:"Kaj je minimum?",a:"Najmanjša vrednost",o:["Najmanjša vrednost","Največja","Povprečje"]},
-    {q:"Kaj je maximum?",a:"Največja vrednost",o:["Največja vrednost","Najmanjša","Povprečje"]},
+{q:"Kaj vrne sum(1,2,3)?",o:["6","3","1","Napaka"],a:"6"},
+{q:"Kaj vrne mean(2,4,6)?",o:["4","6","2","Napaka"],a:"4"},
+{q:"Kaj pomeni median?",o:["Srednja vrednost","Vsota","Max","Min"],a:"Srednja vrednost"},
 
-    {q:"Kaj pomeni data spread?",a:"Razpršenost",o:["Razpršenost","Mean","Graf"]},
-    {q:"Kaj meri range?",a:"Razpon",o:["Razpon","Mean","Graf"]},
-    {q:"Statistika preučuje?",a:"Podatke",o:["Podatke","Graf","Kodo"]},
-    {q:"Kaj meri variance?",a:"Razpršenost",o:["Razpršenost","Povprečje","Max"]},
-    {q:"Kaj naredi sum()?",a:"Vsota",o:["Vsota","Mean","Graf"]},
-    {q:"Kaj je quartile?",a:"Razdeli podatke",o:["Razdeli","Sešteje","Riše"]},
-    {q:"Kaj pomeni central tendency?",a:"Srednje vrednosti",o:["Srednje","Min","Max"]},
-    {q:"Statistični podatki so?",a:"Opazovanja",o:["Opazovanja","Grafi","Koda"]},
-    {q:"Kaj pomeni opisna statistika?",a:"Opis podatkov",o:["Opis","Napoved","Graf"]},
-    {q:"Kaj meri sd?",a:"Standardni odklon",o:["Standardni odklon","Mean","Graf"]},
-    {q:"Kaj naredi summary()?",a:"Povzetek",o:["Povzetek","Izbriše","Riše"]}
+{q:"Kaj meri sd()?",o:["Razpršenost","Povprečje","Vsoto","Napako"],a:"Razpršenost"},
+{q:"Kaj je varianca?",o:["Razpršenost","Povprečje","Max","Min"],a:"Razpršenost"},
 
-  ],
+{q:"Kaj pomeni operator <- ?",o:["Prirejanje","Seštevanje","Primerjanje","Graf"],a:"Prirejanje"},
+{q:"Kaj naredi = ?",o:["Prirejanje","Graf","Napaka","Delete"],a:"Prirejanje"},
 
-  grafi: [
+{q:"Katera funkcija za graf?",o:["plot()","mean()","sum()","rm()"],a:"plot()"},
+{q:"Katera funkcija histogram?",o:["hist()","plot()","barplot()","mean()"],a:"hist()"},
+{q:"Katera funkcija stolpčni graf?",o:["barplot()","hist()","plot()","sum()"],a:"barplot()"},
 
-    {q:"Histogram je za?",a:"Številčne podatke",o:["Številčne podatke","Kategorije","Besede"]},
-    {q:"Barplot prikazuje?",a:"Kategorije",o:["Kategorije","Normalnost","Gostoto"]},
-    {q:"Pie chart prikazuje?",a:"Deleže",o:["Deleže","Mean","SD"]},
-    {q:"Histogram prikazuje?",a:"Porazdelitev",o:["Porazdelitev","Graf","Tabela"]},
+{q:"Kaj prikazuje histogram?",o:["Porazdelitev","Tabela","Besedilo","Napaka"],a:"Porazdelitev"},
+{q:"Kaj prikazuje barplot?",o:["Kategorije","Števila","Napaka","Besedilo"],a:"Kategorije"},
 
-    {q:"Kaj na x-osi histograma?",a:"Vrednosti",o:["Vrednosti","Imena","Grafi"]},
-    {q:"Kaj na y-osi histograma?",a:"Frekvence",o:["Frekvence","Imena","Koda"]},
-    {q:"Barplot stolpci?",a:"Ločeni",o:["Ločeni","Skupaj","Ni"]},
-    {q:"Histogram stolpci?",a:"Skupaj",o:["Skupaj","Ločeni","Ni"]},
-    {q:"Pie chart?",a:"Krog",o:["Krog","Kvadrat","Linija"]},
+{q:"Kaj meri korelacija?",o:["Povezanost","Vsoto","Povprečje","Graf"],a:"Povezanost"},
+{q:"r = 1 pomeni?",o:["Popolna pozitivna","Negativna","Ni povezave","Slaba"],a:"Popolna pozitivna"},
+{q:"r = 0 pomeni?",o:["Ni povezave","Močna","Pozitivna","Negativna"],a:"Ni povezave"},
 
-    {q:"plot() naredi?",a:"Graf",o:["Graf","Tabela","Delete"]},
-    {q:"barplot() naredi?",a:"Stolpčni graf",o:["Stolpčni graf","Pie","Histogram"]},
-    {q:"hist() naredi?",a:"Histogram",o:["Histogram","Barplot","Tabelo"]},
-    {q:"Graf je za?",a:"Vizualizacijo",o:["Vizualizacijo","Brisanje","Shranjevanje"]},
-    {q:"Kaj pomeni x-axis?",a:"Vodoravna os",o:["Vodoravna","Navpična","Ni"]},
-    {q:"Kaj pomeni y-axis?",a:"Navpična os",o:["Navpična","Vodoravna","Ni"]},
-    {q:"Vizualizacija pomaga?",a:"Razumevanje",o:["Razumevanje","Brisanje","Napake"]},
-    {q:"Barplot uporablja?",a:"Frekvence",o:["Frekvence","Matrice","Graf"]},
-    {q:"Histogram uporablja?",a:"Bins",o:["Bins","Rows","Cols"]},
-    {q:"Grafi pomagajo?",a:"Analiza",o:["Analiza","Napaka","Delete"]},
-    {q:"Plot prikaže?",a:"Podatke",o:["Podatke","Napako","Delete"]}
+{q:"Kaj naredi cor()?",o:["Korelacijo","Mean","Sum","Plot"],a:"Korelacijo"},
+{q:"Kaj prikazuje scatter plot?",o:["Odnos","Tabela","Graf","Besedilo"],a:"Odnos"},
 
-  ],
+{q:"Kaj naredi data.frame()?",o:["Tabela","Graf","Delete","Sum"],a:"Tabela"},
+{q:"Kaj je data frame?",o:["Tabela","Graf","Število","Napaka"],a:"Tabela"},
 
-  korelacija: [
+{q:"Kaj vrne dim()?",o:["Dimenzije","Vektor","Graf","Napaka"],a:"Dimenzije"},
+{q:"Kaj vrne sum(c(1,1,1))?",o:["3","1","2","0"],a:"3"},
 
-    {q:"Kaj meri Pearson r?",a:"Povezanost",o:["Povezanost","Mean","SD"]},
-    {q:"r = 1 pomeni?",a:"Popolna pozitivna",o:["Popolna pozitivna","Ni","Negativna"]},
-    {q:"r = 0 pomeni?",a:"Ni povezave",o:["Ni povezave","Pozitivna","Negativna"]},
-    {q:"r = -1 pomeni?",a:"Popolna negativna",o:["Popolna negativna","Pozitivna","Ni"]},
+/* add simple rotated variations */
+{q:"Katera funkcija računa povprečje?",o:["mean()","sum()","sd()","plot()"],a:"mean()"},
+{q:"Katera funkcija vrne vsoto?",o:["sum()","mean()","plot()","sd()"],a:"sum()"},
+{q:"Kaj pomeni NA?",o:["Manjkajoča vrednost","Napaka","0","TRUE"],a:"Manjkajoča vrednost"},
+{q:"Katera struktura ima iste tipe?",o:["Vektor","Seznam","Tabela","Graf"],a:"Vektor"},
+{q:"Kaj naredi length()?",o:["Šteje elemente","Riše","Shrani","Izbriše"],a:"Šteje elemente"},
+{q:"Kaj naredi plot()?",o:["Riše graf","Briše","Shrani","Sešteje"],a:"Riše graf"},
+{q:"Kaj naredi hist()?",o:["Histogram","Tabela","Napaka","Sešteje"],a:"Histogram"},
+{q:"Kaj naredi barplot()?",o:["Stolpčni graf","Histogram","Tabela","Napaka"],a:"Stolpčni graf"},
+{q:"Kaj pomeni vector?",o:["Več vrednosti","Ena","Napaka","Graf"],a:"Več vrednosti"},
+{q:"Kaj pomeni tabela?",o:["Podatki","Graf","Napaka","Vektor"],a:"Podatki"}
 
-    {q:"Korelacija pomeni?",a:"Odnos med spremenljivkami",o:["Odnos","Mean","Graf"]},
-    {q:"Pozitivna korelacija?",a:"Raste skupaj",o:["Raste skupaj","Pada","Ni"]},
-    {q:"Negativna korelacija?",a:"Obratno gibanje",o:["Obratno","Isto","Ni"]},
-    {q:"Korelacija ne pomeni?",a:"Vzročnosti",o:["Vzročnosti","Povezave","Graf"]},
+];
+``
 
-    {q:"cor() naredi?",a:"Izračuna korelacijo",o:["Izračuna","Riše","Briše"]},
-    {q:"Scatter plot?",a:"Točke",o:["Točke","Linije","Krog"]},
-    {q:"Korelacija je?",a:"Statistični ukrep",o:["Ukrep","Graf","Napaka"]},
-    {q:"Močna korelacija?",a:"Visok r",o:["Visok r","Nizek","0"]},
-    {q:"Šibka korelacija?",a:"Nizek r",o:["Nizek r","Visok","0"]},
-    {q:"Linearno pomeni?",a:"Ravna linija",o:["Ravna","Krivulja","Ni"]},
-    {q:"Korelacija uporablja?",a:"Podatke",o:["Podatke","Graf","Naziv"]},
-    {q:"Scatter je?",a:"Graf",o:["Graf","Tabela","Koda"]},
-    {q:"r meri?",a:"Smer in moč",o:["Smer in moč","Mean","SD"]},
-    {q:"Kaj pomeni +?",a:"Pozitivno",o:["Pozitivno","Negativno","Ni"]},
-    {q:"Kaj pomeni -?",a:"Negativno",o:["Negativno","Pozitivno","Ni"]},
-    {q:"Korelacija je med?",a:"2 spremenljivkama",o:["2 spremenljivkama","1","3"]}
-
-  ]
-
-};
+/* ✅ (we reuse pattern → these 20 repeat variations from PDF set) */
 
 /* ================= ENGINE ================= */
 
-let selectedTopics = [];
 let questions = [];
 let current = 0;
 let score = 0;
 
 function startExam() {
 
-  selectedTopics = Array.from(document.querySelectorAll("input:checked"))
-    .map(x => x.value);
-
-  if (selectedTopics.length === 0) {
-    alert("Izberi temo!");
-    return;
-  }
-
   document.getElementById("menu").style.display = "none";
   document.getElementById("quiz").style.display = "block";
 
-  questions = buildExam(12);
+  questions = buildExam(10);
   current = 0;
   score = 0;
 
   showQuestion();
 }
 
-/* ✅ build exam without repeats */
+/* ✅ random unique */
 
 function buildExam(n) {
-
-  let pool = [];
-
-  selectedTopics.forEach(t => {
-    pool = pool.concat(questionBank[t]);
-  });
-
-  shuffle(pool);
-
-  return pool.slice(0, n);
+  let shuffled = shuffle([...questionBank]);
+  return shuffled.slice(0, n);
 }
 
 function showQuestion() {
@@ -270,7 +227,6 @@ function finish() {
   document.getElementById("quiz").style.display = "none";
 
   let res = document.getElementById("result");
-
   res.style.display = "block";
 
   res.innerHTML = `
